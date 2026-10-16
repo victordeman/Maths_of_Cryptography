@@ -68,3 +68,25 @@
   --color-input: hsl(var(--input));
   --color-ring: hsl(var(--ring));
 }
+
+/* Base typography and accessibility helpers */
+.sr-only-focusable:not(:focus):not(:focus-within) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.prose-container {
+  max-width: 65ch;
+}
+
+/* KaTeX dark mode support */
+.dark .katex {
+  color: var(--color-foreground);
+}
