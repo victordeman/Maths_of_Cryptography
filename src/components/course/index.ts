@@ -1,3 +1,7 @@
 export { PageHeader } from "./page-header"
 export { Section } from "./section"
 export { Callout } from "./callout"
+export { Breadcrumb, type BreadcrumbItem } from "./breadcrumb"
+export { ProgressIndicator } from "./progress-indicator"
+export { TableOfContents, type TOCItem } from "./toc"
+export { PrevNextNav, type NavLinkTarget } from "./prev-next-nav"
