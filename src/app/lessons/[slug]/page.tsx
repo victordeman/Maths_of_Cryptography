@@ -1,10 +1,11 @@
 import { notFound } from "next/navigation"
 import Link from "next/link"
-import { PageHeader, Section, Callout, Breadcrumb, ProgressIndicator, TableOfContents, PrevNextNav } from "@/components/course"
+import { PageHeader, Section, Callout, Breadcrumb, ProgressIndicator, TableOfContents, PrevNextNav, FormattedText } from "@/components/course"
 import { syllabusModules, Lesson, Module } from "@/data/syllabus"
+import { allLessonDetails } from "@/data/lessons"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Clock, BookOpen, CheckCircle2, ArrowRight, Lightbulb } from "lucide-react"
+import { Clock, BookOpen, CheckCircle2, ArrowRight, Code } from "lucide-react"
 
 // Helper to flatten all lessons with module information
 function getAllLessonsWithModuleInfo() {
@@ -57,12 +58,18 @@ export default async function LessonDetailPage({ params }: { params: Promise<{ s
   const prevItem = index > 0 ? allLessons[index - 1] : null
   const nextItem = index < allLessons.length - 1 ? allLessons[index + 1] : null
 
-  const tocItems = [
-    { id: "overview", title: "Lesson Overview & Objectives" },
-    { id: "foundations", title: "Mathematical Foundations" },
-    { id: "applications", title: "Cryptographic Applications & Examples" },
-    { id: "summary", title: "Summary & Key Takeaways" },
-  ]
+  // Fetch detailed lesson content
+  const lessonDetail = allLessonDetails[lesson.slug]
+
+  const tocItems = lessonDetail
+    ? [
+        ...lessonDetail.sections.map((s) => ({ id: s.id, title: s.title, level: s.level || 1 })),
+        { id: "summary", title: "Summary & Key Takeaways", level: 1 },
+      ]
+    : [
+        { id: "overview", title: "Overview", level: 1 },
+        { id: "summary", title: "Summary", level: 1 },
+      ]
 
   return (
     <div className="container max-w-7xl mx-auto px-4 sm:px-8 py-8 space-y-8">
@@ -105,95 +112,65 @@ export default async function LessonDetailPage({ params }: { params: Promise<{ s
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         {/* Main Content Column */}
         <div className="lg:col-span-3 space-y-10">
-          {/* Overview & Objectives */}
-          <Section id="overview" title="Lesson Overview & Objectives">
-            <div className="prose dark:prose-invert max-w-none space-y-4 text-foreground/90 leading-relaxed">
-              <p className="text-base sm:text-lg">
-                {lesson.description} This lesson provides both rigorous mathematical proofs and visual, step-by-step implementations essential for modern cryptographic engineering.
-              </p>
+          {lessonDetail ? (
+            lessonDetail.sections.map((section) => (
+              <Section key={section.id} id={section.id} title={section.title}>
+                <div className="space-y-6 text-foreground/90 leading-relaxed text-base sm:text-lg">
+                  <FormattedText text={section.content} />
 
-              <Callout type="definition" title="Key Learning Objectives">
-                <ul className="list-disc list-inside space-y-1.5 text-sm sm:text-base mt-2">
-                  <li>Understand the formal definition and fundamental properties of {lesson.title.toLowerCase()}.</li>
-                  <li>Analyze asymptotic complexity, computational bounds, and key algebraic structures.</li>
-                  <li>Explore practical security applications and vulnerability vectors in cryptosystems.</li>
-                </ul>
-              </Callout>
-            </div>
-          </Section>
+                  {section.callout && (
+                    <Callout type={section.callout.type} title={section.callout.title}>
+                      <FormattedText text={section.callout.content} />
+                    </Callout>
+                  )}
 
-          {/* Mathematical Foundations */}
-          <Section id="foundations" title="Mathematical Foundations">
-            <div className="space-y-6">
-              <p className="text-foreground/90 text-sm sm:text-base leading-relaxed">
-                Modern cryptographic protocols rely on strict algebraic properties and hard mathematical assumptions. In {lesson.title}, we analyze these underlying structures.
-              </p>
-
-              <Callout type="theorem" title={`Fundamental Principle: ${lesson.title}`}>
-                Let $\mathcal&#123;G&#125;$ be a finite algebraic structure associated with {lesson.title}. The underlying security reduces to the hardness of computing discrete invariants or modular inverses within finite fields or rings.
-              </Callout>
-
-              <div className="rounded-xl border bg-card p-6 space-y-4">
-                <h4 className="font-bold text-base text-foreground flex items-center gap-2">
-                  <CheckCircle2 className="h-5 w-5 text-primary" />
-                  Core Mathematical Properties
-                </h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs sm:text-sm text-muted-foreground">
-                  <div className="p-3 rounded-lg bg-muted/50 border space-y-1">
-                    <span className="font-semibold text-foreground block">Closure & Associativity</span>
-                    <span>Guarantees deterministic execution across modular domains and ring operations.</span>
-                  </div>
-                  <div className="p-3 rounded-lg bg-muted/50 border space-y-1">
-                    <span className="font-semibold text-foreground block">Computational Hardness</span>
-                    <span>Ensures polynomial-time encryption/verification while adversary decryption remains superpolynomial.</span>
-                  </div>
+                  {section.codeExample && (
+                    <div className="rounded-xl border bg-slate-950 text-slate-100 p-5 space-y-3 font-mono text-xs sm:text-sm overflow-x-auto my-6 shadow-md">
+                      <div className="flex items-center justify-between gap-2 border-b border-slate-800 pb-2 text-slate-400">
+                        <span className="flex items-center gap-2 font-semibold">
+                          <Code className="h-4 w-4 text-primary" />
+                          {section.codeExample.title || "Code Example"}
+                        </span>
+                        <Badge variant="outline" className="border-slate-700 text-slate-300 text-[10px] uppercase">
+                          {section.codeExample.language}
+                        </Badge>
+                      </div>
+                      <pre className="pt-2 leading-relaxed whitespace-pre font-mono">
+                        <code>{section.codeExample.code}</code>
+                      </pre>
+                    </div>
+                  )}
                 </div>
-              </div>
-            </div>
-          </Section>
-
-          {/* Cryptographic Applications & Examples */}
-          <Section id="applications" title="Cryptographic Applications & Examples">
-            <div className="space-y-6">
-              <p className="text-foreground/90 text-sm sm:text-base leading-relaxed">
-                Theoretical results in {lesson.title} directly power standard security algorithms utilized across web protocols, blockchain systems, and confidential compute frameworks.
+              </Section>
+            ))
+          ) : (
+            <Section id="overview" title="Overview">
+              <p className="text-muted-foreground leading-relaxed text-base sm:text-lg">
+                {lesson.description}
               </p>
-
-              <Callout type="tip" title="Practical Application & Interactive Demonstration">
-                In upcoming interactive modules, you will directly manipulate key lengths, verify signatures, and run step-by-step mathematical executions client-side.
-              </Callout>
-
-              <div className="rounded-xl border bg-muted/30 p-6 space-y-3">
-                <div className="flex items-center gap-2 font-semibold text-foreground text-sm">
-                  <Lightbulb className="h-4 w-4 text-amber-500" />
-                  <span>Real-World Security Example</span>
-                </div>
-                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                  When deployed in protocols like TLS 1.3 or SSH, the properties of {lesson.title} protect data against passive eavesdropping and active tampering over untrusted networks.
-                </p>
-              </div>
-            </div>
-          </Section>
+            </Section>
+          )}
 
           {/* Summary & Key Takeaways */}
           <Section id="summary" title="Summary & Key Takeaways">
             <div className="rounded-xl border bg-card p-6 space-y-4">
-              <p className="text-sm sm:text-base text-foreground/90 leading-relaxed">
-                In summary, <strong>{lesson.title}</strong> serves as a fundamental building block in modern cryptographic design.
+              <p className="text-sm sm:text-base text-foreground/90 leading-relaxed font-medium">
+                In summary, <strong>{lesson.title}</strong> equips security researchers with crucial mathematical foundations and practical cryptanalytic tools.
               </p>
               <div className="space-y-2 text-xs sm:text-sm text-muted-foreground">
-                <div className="flex items-start gap-2">
-                  <span className="h-1.5 w-1.5 rounded-full bg-primary shrink-0 mt-2" />
-                  <span>Algebraic structure and bounds establish formal correctness proofs.</span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <span className="h-1.5 w-1.5 rounded-full bg-primary shrink-0 mt-2" />
-                  <span>Algorithms offer efficient $O(\log n)$ or polynomial complexity for authorized operations.</span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <span className="h-1.5 w-1.5 rounded-full bg-primary shrink-0 mt-2" />
-                  <span>Underlying complexity assumptions prevent unauthorized decryption and forgery attacks.</span>
-                </div>
+                {lessonDetail ? (
+                  lessonDetail.summaryTakeaways.map((item, idx) => (
+                    <div key={idx} className="flex items-start gap-2.5">
+                      <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+                      <FormattedText text={item} />
+                    </div>
+                  ))
+                ) : (
+                  <div className="flex items-start gap-2">
+                    <span className="h-1.5 w-1.5 rounded-full bg-primary shrink-0 mt-2" />
+                    <span>Key mathematical structures establish formal security guarantees.</span>
+                  </div>
+                )}
               </div>
             </div>
           </Section>
