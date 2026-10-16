@@ -17,6 +17,7 @@ const primaryNavItems = [
   { href: "/", label: "Home" },
   { href: "/modules", label: "Modules" },
   { href: "/lessons", label: "Lessons" },
+  { href: "/challenges", label: "Challenges" },
 ]
 
 const secondaryNavItems = [
