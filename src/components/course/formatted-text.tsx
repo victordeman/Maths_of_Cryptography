@@ -4,16 +4,20 @@ import katex from "katex"
 interface FormattedTextProps {
   text: string
   className?: string
+  as?: "div" | "span"
 }
 
-export function FormattedText({ text, className = "" }: FormattedTextProps) {
+export function FormattedText({ text, className = "", as }: FormattedTextProps) {
   if (!text) return null
 
   // Process block math $$...$$ first, then inline math $...$
   const blockParts = text.split(/(\$\$.*?\$\$)/g)
+  const hasBlockMath = blockParts.some(p => p.startsWith("$$") && p.endsWith("$$") && p.length > 4)
+
+  const Component = as || (hasBlockMath ? "div" : "span")
 
   return (
-    <div className={`space-y-2 leading-relaxed ${className}`}>
+    <Component className={`${hasBlockMath ? "space-y-2 leading-relaxed" : "leading-relaxed"} ${className}`}>
       {blockParts.map((part, pIdx) => {
         if (part.startsWith("$$") && part.endsWith("$$") && part.length > 4) {
           const math = part.slice(2, -2).trim()
@@ -64,6 +68,6 @@ export function FormattedText({ text, className = "" }: FormattedTextProps) {
           </span>
         )
       })}
-    </div>
+    </Component>
   )
 }

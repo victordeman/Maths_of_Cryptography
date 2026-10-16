@@ -5,7 +5,13 @@ import { syllabusModules, Lesson, Module } from "@/data/syllabus"
 import { allLessonDetails } from "@/data/lessons"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Clock, BookOpen, CheckCircle2, ArrowRight, Code } from "lucide-react"
+import { Clock, BookOpen, CheckCircle2, ArrowRight, Code, Sparkles } from "lucide-react"
+import { CaesarCipher } from "@/components/interactive/caesar-cipher"
+import { FrequencyAnalysis } from "@/components/interactive/frequency-analysis"
+import { ModularCalculator } from "@/components/interactive/modular-calculator"
+import { DiffieHellmanDemo } from "@/components/interactive/diffie-hellman-demo"
+import { RSADemo } from "@/components/interactive/rsa-demo"
+import { EllipticCurveVisualizer } from "@/components/interactive/elliptic-curve-visualizer"
 
 // Helper to flatten all lessons with module information
 function getAllLessonsWithModuleInfo() {
@@ -61,13 +67,24 @@ export default async function LessonDetailPage({ params }: { params: Promise<{ s
   // Fetch detailed lesson content
   const lessonDetail = allLessonDetails[lesson.slug]
 
+  const hasInteractiveTool = [
+    "classical-ciphers-cryptanalysis",
+    "modular-arithmetic-congruences",
+    "divisibility-euclidean-algorithm",
+    "rsa-cryptosystem-factorization",
+    "diffie-hellman-discrete-log",
+    "elliptic-curves-real-finite-fields",
+  ].includes(slug)
+
   const tocItems = lessonDetail
     ? [
         ...lessonDetail.sections.map((s) => ({ id: s.id, title: s.title, level: s.level || 1 })),
+        ...(hasInteractiveTool ? [{ id: "interactive-lab", title: "Interactive Cryptography Lab", level: 1 }] : []),
         { id: "summary", title: "Summary & Key Takeaways", level: 1 },
       ]
     : [
         { id: "overview", title: "Overview", level: 1 },
+        ...(hasInteractiveTool ? [{ id: "interactive-lab", title: "Interactive Cryptography Lab", level: 1 }] : []),
         { id: "summary", title: "Summary", level: 1 },
       ]
 
@@ -148,6 +165,41 @@ export default async function LessonDetailPage({ params }: { params: Promise<{ s
               <p className="text-muted-foreground leading-relaxed text-base sm:text-lg">
                 {lesson.description}
               </p>
+            </Section>
+          )}
+
+          {/* Contextual Interactive Tool Integration */}
+          {hasInteractiveTool && (
+            <Section id="interactive-lab" title="Interactive Cryptography Lab">
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 text-primary font-medium text-sm">
+                  <Sparkles className="h-4 w-4" />
+                  <span>Try It Yourself — Experiment with live cryptographic primitives below:</span>
+                </div>
+
+                {slug === "classical-ciphers-cryptanalysis" && (
+                  <div className="space-y-6">
+                    <CaesarCipher />
+                    <FrequencyAnalysis />
+                  </div>
+                )}
+
+                {(slug === "modular-arithmetic-congruences" || slug === "divisibility-euclidean-algorithm") && (
+                  <ModularCalculator />
+                )}
+
+                {slug === "diffie-hellman-discrete-log" && (
+                  <DiffieHellmanDemo />
+                )}
+
+                {slug === "rsa-cryptosystem-factorization" && (
+                  <RSADemo />
+                )}
+
+                {slug === "elliptic-curves-real-finite-fields" && (
+                  <EllipticCurveVisualizer />
+                )}
+              </div>
             </Section>
           )}
 
