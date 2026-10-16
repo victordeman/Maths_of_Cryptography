@@ -1,8 +1,9 @@
 import { notFound } from "next/navigation"
 import Link from "next/link"
-import { PageHeader, Section, Callout, Breadcrumb, ProgressIndicator, TableOfContents, PrevNextNav, FormattedText } from "@/components/course"
+import { PageHeader, Section, Callout, Breadcrumb, ProgressIndicator, TableOfContents, PrevNextNav, FormattedText, QuizComponent } from "@/components/course"
 import { syllabusModules, Lesson, Module } from "@/data/syllabus"
 import { allLessonDetails } from "@/data/lessons"
+import { QUIZZES } from "@/data/quizzes"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Clock, BookOpen, CheckCircle2, ArrowRight, Code, Sparkles } from "lucide-react"
@@ -67,6 +68,14 @@ export default async function LessonDetailPage({ params }: { params: Promise<{ s
   // Fetch detailed lesson content
   const lessonDetail = allLessonDetails[lesson.slug]
 
+  const quizKeyMap: Record<string, string> = {
+    "divisibility-euclidean-algorithm": "divisibility-euclidean-algorithm",
+    "modular-arithmetic-congruences": "modular-arithmetic-congruences",
+    "rsa-cryptosystem-factorization": "rsa-cryptosystem",
+    "diffie-hellman-discrete-log": "diffie-hellman-key-exchange",
+  }
+  const quiz = QUIZZES[quizKeyMap[slug] || slug]
+
   const hasInteractiveTool = [
     "classical-ciphers-cryptanalysis",
     "modular-arithmetic-congruences",
@@ -80,11 +89,13 @@ export default async function LessonDetailPage({ params }: { params: Promise<{ s
     ? [
         ...lessonDetail.sections.map((s) => ({ id: s.id, title: s.title, level: s.level || 1 })),
         ...(hasInteractiveTool ? [{ id: "interactive-lab", title: "Interactive Cryptography Lab", level: 1 }] : []),
+        ...(quiz ? [{ id: "knowledge-check", title: "Knowledge Check Quiz", level: 1 }] : []),
         { id: "summary", title: "Summary & Key Takeaways", level: 1 },
       ]
     : [
         { id: "overview", title: "Overview", level: 1 },
         ...(hasInteractiveTool ? [{ id: "interactive-lab", title: "Interactive Cryptography Lab", level: 1 }] : []),
+        ...(quiz ? [{ id: "knowledge-check", title: "Knowledge Check Quiz", level: 1 }] : []),
         { id: "summary", title: "Summary", level: 1 },
       ]
 
@@ -203,6 +214,13 @@ export default async function LessonDetailPage({ params }: { params: Promise<{ s
             </Section>
           )}
 
+          {/* Quiz / Knowledge Check Section */}
+          {quiz && (
+            <Section id="knowledge-check" title="Knowledge Check Quiz">
+              <QuizComponent quiz={quiz} />
+            </Section>
+          )}
+
           {/* Summary & Key Takeaways */}
           <Section id="summary" title="Summary & Key Takeaways">
             <div className="rounded-xl border bg-card p-6 space-y-4">
@@ -229,6 +247,7 @@ export default async function LessonDetailPage({ params }: { params: Promise<{ s
 
           {/* Previous / Next Lesson Navigation */}
           <PrevNextNav
+            lessonSlug={lesson.slug}
             prev={
               prevItem
                 ? {
