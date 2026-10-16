@@ -42,6 +42,7 @@ export function CaesarCipher() {
         </div>
         <button
           onClick={() => setMode(mode === 'encode' ? 'decode' : 'encode')}
+          aria-label={`Toggle mode, currently ${mode === 'encode' ? 'Encrypting' : 'Decrypting'}`}
           className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 transition-colors"
         >
           <ArrowRightLeft className="w-3.5 h-3.5" />
@@ -51,13 +52,15 @@ export function CaesarCipher() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <div>
-          <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+          <label htmlFor="caesar-input" className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">
             Input Text ({mode === 'encode' ? 'Plaintext' : 'Ciphertext'})
           </label>
           <input
+            id="caesar-input"
             type="text"
             value={text}
             onChange={(e) => setText(e.target.value)}
+            aria-label="Input text for Caesar cipher"
             className="w-full px-3 py-2 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
             placeholder="Type plaintext or ciphertext..."
           />
@@ -65,7 +68,7 @@ export function CaesarCipher() {
 
         <div>
           <div className="flex items-center justify-between mb-1">
-            <label className="text-xs font-medium text-zinc-700 dark:text-zinc-300">
+            <label htmlFor="caesar-shift" className="text-xs font-medium text-zinc-700 dark:text-zinc-300">
               Shift Key ($k = {shift}$)
             </label>
             <span className="text-xs text-indigo-600 dark:text-indigo-400 font-mono">
@@ -73,11 +76,13 @@ export function CaesarCipher() {
             </span>
           </div>
           <input
+            id="caesar-shift"
             type="range"
             min="0"
             max="25"
             value={shift}
             onChange={(e) => setShift(parseInt(e.target.value, 10))}
+            aria-label={`Shift key slider, value ${shift}`}
             className="w-full accent-indigo-600 cursor-pointer"
           />
         </div>
