@@ -17,7 +17,7 @@ export default function AboutPage() {
       <Breadcrumb items={[{ label: "About" }]} />
 
       <PageHeader
-        badge="CS / MATH 401"
+        badge="Course Overview"
         title="About The Course"
         description={courseDescription}
       />
