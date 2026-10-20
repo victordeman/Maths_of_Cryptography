@@ -30,9 +30,6 @@ export default function Home() {
         <div className="max-w-3xl space-y-6">
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant="secondary" className="px-3 py-1 text-xs font-semibold tracking-wide">
-              CS / MATH 401
-            </Badge>
-            <Badge variant="outline" className="px-3 py-1 text-xs font-medium text-muted-foreground">
               Interactive Online Course
             </Badge>
           </div>
